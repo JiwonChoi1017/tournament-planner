@@ -23,8 +23,3 @@ export const signInWithEmailAction = async (formData: FormData) => {
     },
   });
 };
-
-export const signOutAction = async () => {
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signOut();
-};

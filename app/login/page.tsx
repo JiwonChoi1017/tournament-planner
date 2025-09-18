@@ -1,6 +1,6 @@
 "use client";
 
-import { AUTH_PROVIDER } from "@/constants/common";
+import { AUTH_PROVIDER } from "@/constants/commonConstant";
 import { AuthProvider } from "@/types/common";
 import { createClient } from "@/utils/supabase/client";
 import { signInWithEmailAction } from "@/actions/authAction";

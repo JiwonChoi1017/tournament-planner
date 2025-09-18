@@ -1,5 +1,6 @@
 "use client";
 
+import TournamentBracket from "@/components/ui/TournamentBracket";
 import { useParams } from "next/navigation";
 
 const TournamentDetail = () => {
@@ -8,6 +9,7 @@ const TournamentDetail = () => {
   return (
     <>
       <span>{params.id}</span>
+      <TournamentBracket />
     </>
   );
 };
