@@ -1,70 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import Link from "next/link";
-import { PAGES_URL } from "@/constants/common";
-import { createClient } from "@/utils/supabase/client";
-import { signOutAction } from "@/actions/authAction";
+import { PAGES_URL } from "@/constants/commonConstant";
+import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-interface User {
-  isLogin: boolean;
-  uuid: string;
-  name: string;
-}
-
 const Header = () => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const { isLogin, user, loading, signOut } = useAuth();
   const router = useRouter();
 
-  const onClickLogoutHandler = async () => {
+  const onClickLogoutButtonHandler = async () => {
     // アラートを挟むように
-    await signOutAction();
-    setCurrentUser({
-      isLogin: false,
-      uuid: localStorage.getItem("guest_id") || "",
-      name: "ゲスト",
-    });
-    router.push(`${process.env.NEXT_PUBLIC_APP_URL}${PAGES_URL.TOP}`);
-  };
-
-  const getCurrentUser = async () => {
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.getSession();
-
-    if (!data.session) {
-      if (!localStorage.getItem("guest_id")) {
-        // 初回アクセス時にゲストidを生成してlocalStorageに保存する
-        localStorage.setItem("guest_id", crypto.randomUUID());
-      }
-
-      setCurrentUser({
-        isLogin: false,
-        uuid: localStorage.getItem("guest_id") || "",
-        name: "ゲスト",
-      });
-
-      return;
-    }
-
-    // レスポンスからデータ取得して値を詰める
-    setCurrentUser({
-      isLogin: true,
-      uuid: "aaa",
-      name: "bbb",
-    });
+    await signOut();
+    router.push(PAGES_URL.TOP);
   };
 
   useEffect(() => {
-    getCurrentUser();
-  }, []);
+    if (!isLogin && !localStorage.getItem("guest_id")) {
+      // ゲストかつ初回アクセスの場合、ゲストidを生成してlocalStorageに保存する
+      localStorage.setItem("guest_id", crypto.randomUUID());
+    }
+  }, [isLogin]);
 
   return (
     <header>
-      <span>{currentUser?.name}</span>
-      {currentUser?.isLogin ? (
-        <span onClick={onClickLogoutHandler}>ログアウト</span>
+      <Link href={PAGES_URL.TOP}>ああああ</Link>
+      <span>{user?.name}</span>
+      {isLogin ? (
+        <span onClick={onClickLogoutButtonHandler}>ログアウト</span>
       ) : (
         <Link href={PAGES_URL.LOGIN}>ログイン</Link>
       )}

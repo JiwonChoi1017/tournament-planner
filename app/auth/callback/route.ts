@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PAGES_URL } from "@/constants/common";
+import { PAGES_URL } from "@/constants/commonConstant";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: Request) {

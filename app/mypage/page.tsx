@@ -1,9 +1,9 @@
-const MyPage = () => {
+"use client";
+
+export default function MyPage() {
   return (
     <>
-      <span>My Page</span>
+      <span>MyPage</span>
     </>
   );
-};
-
-export default MyPage;
+}
