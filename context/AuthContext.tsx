@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/client";
@@ -23,26 +23,49 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [user, setUser] = useState<(User & { name: string }) | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setIsLogin(!!data.session);
-      setUser(
-        data.session?.user ? { ...data.session?.user, name: "aaa" } : null
-      );
-      setLoading(false);
-    });
+    let isMounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          // エラーハンドリング
+          return;
+        }
+
+        if (isMounted) {
+          setIsLogin(!!data.session);
+          setUser(
+            data.session?.user ? { ...data.session?.user, name: "aaa" } : null
+          );
+          setLoading(false);
+        }
+      } catch (error) {
+        // エラーハンドリング
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
 
     // 状態変化の監視
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        setIsLogin(!!session);
-        setUser(session?.user ? { ...session?.user, name: "aaa" } : null);
+        if (isMounted) {
+          setIsLogin(!!session);
+          // 名前どうするか迷ってるとこ
+          setUser(session?.user ? { ...session?.user, name: "aaa" } : null);
+        }
       }
     );
 
     return () => {
+      isMounted = false;
       listener.subscription.unsubscribe();
     };
   }, [supabase]);
