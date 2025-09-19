@@ -10,3 +10,8 @@ export const AUTH_PROVIDER = {
   FACEBOOK: "facebook",
   TWITTER: "twitter",
 } as const;
+
+export const MATCH_RESULT = {
+  WIN: "win",
+  LOSE: "lose",
+} as const;

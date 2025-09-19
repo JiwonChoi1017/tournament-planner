@@ -1,14 +1,18 @@
+"use client";
+
 import TournamentBracket from "@/components/ui/TournamentBracket";
 import TournamentForm from "@/components/ui/TournamentForm";
 
-const TournamentEdit = () => {
+export default function TournamentEdit() {
+  const submitHandler = (formData: FormData) => {
+    return;
+  };
+
   return (
     <>
       <span>Tournament Edit</span>
-      <TournamentForm />
-      <TournamentBracket />
+      <TournamentForm submitHandler={submitHandler} />
+      <TournamentBracket matches={[]} />
     </>
   );
-};
-
-export default TournamentEdit;
+}
