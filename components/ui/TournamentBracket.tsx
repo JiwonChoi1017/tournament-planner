@@ -1,39 +1,59 @@
 import { MATCH_RESULT } from "@/constants/commonConstant";
-import { Match } from "@/types/common";
+import { Matches } from "@/types/common";
 
 type Props = {
-  matches: Match[];
+  matches: Matches[];
 };
 
 const TournamentBracket = ({ matches }: Props) => {
   return (
     <div>
-      {matches.map(({ round, player1, player2 }) => (
-        <div key={round}>
-          {player1 && (
-            <div>
-              <input
-                type="radio"
-                name={`result_${round}`}
-                value={player1.id}
-                defaultChecked={player1.result === MATCH_RESULT.WIN}
-              />
-              <label>{`${player1.name}`}</label>
-            </div>
-          )}
-          {player2 && (
-            <div>
-              <input
-                type="radio"
-                name={`result_${round}`}
-                value={player2.id}
-                defaultChecked={player2.result === MATCH_RESULT.WIN}
-              />
-              <label>{`${player2.name}`}</label>
-            </div>
-          )}
-        </div>
-      ))}
+      {matches.map((value) =>
+        value.aaaaa.map(({ id, currentRound, player1, player2 }) => (
+          <div key={`${value.id}_${id}`} style={{ marginBottom: "10px" }}>
+            {player1 ? (
+              <div>
+                <input
+                  type="radio"
+                  name={`result_${id}`}
+                  value={player1.id}
+                  defaultChecked={player1.result === MATCH_RESULT.WIN}
+                />
+                <label>
+                  <input type="text" defaultValue={`${player1.name}`} />
+                </label>
+              </div>
+            ) : (
+              <div>
+                <input type="radio" name={`result_${id}`} />
+                <label>
+                  <input type="text" />
+                </label>
+              </div>
+            )}
+            {player2 ? (
+              <div>
+                <input
+                  type="radio"
+                  name={`result_${id}`}
+                  value={player2.id}
+                  defaultChecked={player2.result === MATCH_RESULT.WIN}
+                />
+                <label>
+                  <input type="text" defaultValue={`${player2.name}`} />
+                </label>
+              </div>
+            ) : (
+              <div>
+                <input type="radio" name={`result_${id}`} />
+                <label>
+                  <input type="text" />
+                </label>
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 };

@@ -1,14 +1,14 @@
 "use client";
 
-import { Match, Player } from "@/types/common";
-import { createMatch1, createMatch2, shufflePlayers } from "@/utils/tournament";
+import { Matches, Player } from "@/types/common";
+import { createBracket, shufflePlayers } from "@/utils/tournament";
 
 import TournamentBracket from "@/components/ui/TournamentBracket";
 import TournamentForm from "@/components/ui/TournamentForm";
 import { useState } from "react";
 
 export default function TournamentInput() {
-  const [matches, setMatches] = useState<Match[]>([]);
+  const [matches, setMatches] = useState<Matches[]>([]);
 
   // 保存と処理を切り分けたい
   const submitHandler = async (formData: FormData) => {
@@ -28,9 +28,9 @@ export default function TournamentInput() {
       }
     );
 
-    console.log(shuffledPlayers);
-    console.log(createMatch2(shuffledPlayers));
-    setMatches(createMatch2(shuffledPlayers));
+    // console.log(shuffledPlayers);
+    console.log(createBracket(shuffledPlayers));
+    setMatches(createBracket(shuffledPlayers));
     // トーナメント表のidを生成し、dbに格納
   };
 
