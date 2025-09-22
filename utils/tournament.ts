@@ -1,4 +1,4 @@
-import { Match, Player } from "@/types/common";
+import { Match, Matches, Player } from "@/types/common";
 
 import { MATCH_RESULT } from "@/constants/commonConstant";
 
@@ -15,45 +15,47 @@ export const shufflePlayers = (unshuffledPlayers: string[]): string[] => {
   return shuffledPlayers;
 };
 
-export const createMatch1 = (players: Player[]): Match[] => {
-  let round = 1;
-  const matches: Match[] = [];
-
-  for (let i = 0; i < players.length; i += 2) {
-    if (i + 1 < players.length) {
-      matches.push({
-        round: round++,
-        player1: players[i],
-        player2: players[i + 1],
-      });
-    } else {
-      // 余りが出た場合
-      matches.push({
-        round: round++,
-        player1: { ...players[i], result: MATCH_RESULT.WIN },
-      });
-    }
-  }
-
-  return matches;
+const sumRounds = (num: number): number => {
+  if (num === 0) return 0;
+  return num + sumRounds(Math.floor(num / 2));
 };
 
-export const createMatch2 = (players: Player[]): Match[] => {
-  const used = new Set();
-  const matches = [];
-  let round = 1;
-  const pairLength =
-    players.length % 3 === 0
-      ? Math.floor(players.length / 3)
-      : Math.floor(players.length / 3) + 1;
-  const seedPlayerLength = players.length - pairLength * 2;
+const calculateTotalRoundNum = (
+  maxPower: number,
+  minPower: number,
+  totalPlayerNum: number
+) => {
+  return 2 ** maxPower - totalPlayerNum >= totalPlayerNum - 2 ** minPower
+    ? Math.floor(2 ** (minPower - 1)) +
+        (totalPlayerNum - 2 ** minPower) +
+        sumRounds(2 ** (minPower - 2))
+    : totalPlayerNum - 2 ** minPower + sumRounds(2 ** (minPower - 1));
+};
 
-  for (let i = 0; i < seedPlayerLength; i++) {
+export const createBracket = (players: Player[]) => {
+  const totalPlayerNum = players.length;
+  const maxPower = Math.ceil(Math.log2(totalPlayerNum));
+  const minPower = maxPower - 1;
+  const seedPlayerNum =
+    2 ** maxPower - totalPlayerNum > totalPlayerNum - 2 ** minPower
+      ? totalPlayerNum - 2 ** minPower
+      : 2 ** maxPower - totalPlayerNum;
+  console.log(
+    totalPlayerNum,
+    calculateTotalRoundNum(maxPower, minPower, totalPlayerNum)
+  );
+
+  let id = 1;
+  let round = 1;
+  const used = new Set();
+  const matches: Match[] = [];
+
+  for (let i = 0; i < seedPlayerNum; i++) {
     const player = players.find((p) => p.id === i * 3);
     if (!player) continue;
 
     matches.push({
-      round: round++,
+      id: id++,
       player1: {
         ...player,
         result: MATCH_RESULT.WIN,
@@ -64,13 +66,46 @@ export const createMatch2 = (players: Player[]): Match[] => {
 
   const remainedPlayers = players.filter(({ id }) => !used.has(id));
 
+  // ロジックの改修がいる（2回戦から必ず偶数になるように）
   for (let i = 0; i < remainedPlayers.length; i += 2) {
     matches.push({
-      round: round++,
+      id: id++,
+      currentRound: round++,
       player1: remainedPlayers[i],
       player2: remainedPlayers[i + 1],
     });
   }
 
-  return [...matches].sort((a, b) => (a.player1.id > b.player1.id ? 1 : -1));
+  const sortedMatches = [...matches].sort((a, b) =>
+    (a.player1 as Player).id > (b.player1 as Player).id ? 1 : -1
+  );
+
+  let nextRound = round;
+
+  for (let i = 0; i < sortedMatches.length; i += 2) {
+    if (i + 1 < sortedMatches.length) {
+      sortedMatches[i].nextRound = nextRound;
+      sortedMatches[i + 1].nextRound = nextRound;
+      nextRound++;
+    }
+  }
+
+  let result: Matches[] = [];
+  let matchId = 1;
+  result.push({ id: matchId++, aaaaa: sortedMatches });
+
+  while ((result.at(-1)?.aaaaa ?? []).length > 1) {
+    const temp = result.at(-1)?.aaaaa ?? [];
+    const temp2: Match[] = [];
+    for (let i = 0; i < temp.length / 2; i++) {
+      if (temp.length === 2) {
+        temp2.push({ id: id++, currentRound: round++ });
+      } else {
+        temp2.push({ id: id++, currentRound: round++, nextRound: nextRound++ });
+      }
+    }
+    result.push({ id: matchId++, aaaaa: temp2 });
+  }
+
+  return result;
 };
