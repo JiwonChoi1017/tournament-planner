@@ -90,7 +90,7 @@ export const createBracket = (players: Player[]) => {
     }
   }
 
-  let result: Matches[] = [];
+  const result: Matches[] = [];
   let matchId = 1;
   result.push({ id: matchId++, aaaaa: sortedMatches });
 
