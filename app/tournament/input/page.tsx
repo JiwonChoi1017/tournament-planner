@@ -8,7 +8,7 @@ import TournamentForm from "@/components/ui/TournamentForm";
 import { useState } from "react";
 
 export default function TournamentInput() {
-  const [matches, setMatches] = useState<Matches[]>([]);
+  const [matches, setMatches] = useState<Matches | undefined>();
 
   // 保存と処理を切り分けたい
   const submitHandler = async (formData: FormData) => {
@@ -28,7 +28,6 @@ export default function TournamentInput() {
       }
     );
 
-    // console.log(shuffledPlayers);
     console.log(createBracket(shuffledPlayers));
     setMatches(createBracket(shuffledPlayers));
     // トーナメント表のidを生成し、dbに格納

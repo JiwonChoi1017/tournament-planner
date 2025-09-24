@@ -1,4 +1,5 @@
-import { Match, Matches, Player } from "@/types/common";
+import { Match, Player } from "@/types/common";
+import { isPowerOfTwo, omitResult, sumRounds } from "./common";
 
 import { MATCH_RESULT } from "@/constants/commonConstant";
 
@@ -13,11 +14,6 @@ export const shufflePlayers = (unshuffledPlayers: string[]): string[] => {
   }
 
   return shuffledPlayers;
-};
-
-const sumRounds = (num: number): number => {
-  if (num === 0) return 0;
-  return num + sumRounds(Math.floor(num / 2));
 };
 
 const calculateTotalRoundNum = (
@@ -40,71 +36,168 @@ export const createBracket = (players: Player[]) => {
     2 ** maxPower - totalPlayerNum > totalPlayerNum - 2 ** minPower
       ? totalPlayerNum - 2 ** minPower
       : 2 ** maxPower - totalPlayerNum;
-  console.log(
-    totalPlayerNum,
-    calculateTotalRoundNum(maxPower, minPower, totalPlayerNum)
+  const totalRoundNum = calculateTotalRoundNum(
+    maxPower,
+    minPower,
+    totalPlayerNum
   );
+  console.log(players);
 
-  let id = 1;
   let round = 1;
+  let remainRoundNum = totalRoundNum;
   const used = new Set();
   const matches: Match[] = [];
 
   for (let i = 0; i < seedPlayerNum; i++) {
-    const player = players.find((p) => p.id === i * 3);
-    if (!player) continue;
-
-    matches.push({
-      id: id++,
-      player1: {
-        ...player,
-        result: MATCH_RESULT.WIN,
-      },
-    });
-    used.add(player.id);
+    if (i % 2 === 0) {
+      matches.push({
+        player1: {
+          ...players[i],
+          result: MATCH_RESULT.WIN,
+        },
+      });
+    } else {
+      matches.push({
+        player2: {
+          ...players[i],
+          result: MATCH_RESULT.WIN,
+        },
+      });
+    }
+    used.add(players[i].id);
   }
 
   const remainedPlayers = players.filter(({ id }) => !used.has(id));
+  while (!isPowerOfTwo(remainRoundNum + 1)) {
+    for (let i = 0; i < remainedPlayers.length; i += 2) {
+      matches.push({
+        currentRound: round,
+        player1: remainedPlayers[i],
+        player2: remainedPlayers[i + 1],
+      });
+      used.add(remainedPlayers[i].id);
+      used.add(remainedPlayers[i + 1].id);
 
-  // ロジックの改修がいる（2回戦から必ず偶数になるように）
-  for (let i = 0; i < remainedPlayers.length; i += 2) {
-    matches.push({
-      id: id++,
-      currentRound: round++,
-      player1: remainedPlayers[i],
-      player2: remainedPlayers[i + 1],
-    });
+      round++;
+      remainRoundNum--;
+
+      // remainRoundNum + 1が2の冪になったら即座にループを抜ける
+      if (isPowerOfTwo(remainRoundNum + 1)) {
+        break;
+      }
+    }
   }
 
-  const sortedMatches = [...matches].sort((a, b) =>
-    (a.player1 as Player).id > (b.player1 as Player).id ? 1 : -1
+  const aaadddd = remainedPlayers.filter(({ id }) => !used.has(id));
+  if (aaadddd.length) {
+    for (let i = 0; i < aaadddd.length; i += 2) {
+      matches.push({
+        player1: aaadddd[i],
+        player2: aaadddd[i + 1],
+      });
+    }
+  }
+
+  // matches配列を交互にソート
+  const winWithoutPlayer2 = matches.filter(
+    (match) => !match.player1 || !match.player2
   );
+  const hasPlayer2NoResult = matches.filter(
+    (match) => match.player1 && match.player2 && match.currentRound
+  );
+  const bbbbb = matches.filter(
+    (match) => match.player1 && match.player2 && !match.currentRound
+  );
+
+  const sortedMatches: Match[] = [];
+
+  for (let i = 0; i < matches.length; i++) {
+    if (i % 2 === 0) {
+      if (i < winWithoutPlayer2.length) {
+        sortedMatches.push(winWithoutPlayer2[i]);
+      }
+      if (i < hasPlayer2NoResult.length) {
+        sortedMatches.push(hasPlayer2NoResult[i]);
+      }
+      if (i < bbbbb.length) {
+        sortedMatches.push(bbbbb[i]);
+      }
+    } else {
+      if (i < bbbbb.length) {
+        sortedMatches.push(bbbbb[i]);
+      }
+      if (i < hasPlayer2NoResult.length) {
+        sortedMatches.push(hasPlayer2NoResult[i]);
+      }
+      if (i < winWithoutPlayer2.length) {
+        sortedMatches.push(winWithoutPlayer2[i]);
+      }
+    }
+  }
 
   let nextRound = round;
 
-  for (let i = 0; i < sortedMatches.length; i += 2) {
-    if (i + 1 < sortedMatches.length) {
-      sortedMatches[i].nextRound = nextRound;
-      sortedMatches[i + 1].nextRound = nextRound;
-      nextRound++;
+  while (sortedMatches.filter((value) => !value.nextRound).length > 0) {
+    for (let i = 0; i < sortedMatches.length; i++) {
+      if (
+        sortedMatches[i].player1 &&
+        sortedMatches[i].player2 &&
+        !sortedMatches[i].currentRound
+      ) {
+        sortedMatches[i].nextRound = nextRound++;
+      } else {
+        sortedMatches[i].nextRound = nextRound;
+        if (
+          sortedMatches.filter((value) => value.nextRound === nextRound)
+            .length === 2
+        ) {
+          nextRound++;
+        }
+      }
     }
   }
 
-  const result: Matches[] = [];
-  let matchId = 1;
-  result.push({ id: matchId++, aaaaa: sortedMatches });
+  const result = new Map<number, Match[]>();
+  let matchId = 0;
+  result.set(matchId++, sortedMatches);
 
-  while ((result.at(-1)?.aaaaa ?? []).length > 1) {
-    const temp = result.at(-1)?.aaaaa ?? [];
-    const temp2: Match[] = [];
-    for (let i = 0; i < temp.length / 2; i++) {
-      if (temp.length === 2) {
-        temp2.push({ id: id++, currentRound: round++ });
-      } else {
-        temp2.push({ id: id++, currentRound: round++, nextRound: nextRound++ });
+  while (remainRoundNum > 0) {
+    const temp: Match[] = [];
+    const tempNum = remainRoundNum;
+    const sss = 2 ** Math.trunc(Math.log2(tempNum));
+    let shouldContinue = false;
+
+    for (let i = tempNum; i >= sss; i--) {
+      const dsgsdgsdg: Match = { currentRound: round };
+      const prevRoundElement = Array.from(result.values())
+        .pop()
+        ?.find((value) => value.nextRound === round && !value.currentRound);
+      if (prevRoundElement) {
+        dsgsdgsdg.player1 = omitResult(prevRoundElement.player1!);
+        dsgsdgsdg.player2 = omitResult(prevRoundElement.player2!);
+      }
+      temp.push(dsgsdgsdg);
+      round++;
+      remainRoundNum--;
+      if (i === remainRoundNum) {
+        shouldContinue = true;
+        break;
       }
     }
-    result.push({ id: matchId++, aaaaa: temp2 });
+
+    if (shouldContinue) {
+      continue;
+    }
+
+    if (temp.length > 1) {
+      for (let i = 0; i < temp.length; i += 2) {
+        temp[i] = { ...temp[i], nextRound };
+        temp[i + 1] = { ...temp[i + 1], nextRound };
+        nextRound++;
+      }
+    }
+
+    result.set(matchId++, temp);
   }
 
   return result;
