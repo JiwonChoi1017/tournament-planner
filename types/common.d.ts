@@ -13,14 +13,10 @@ type Player = {
 };
 
 type Match = {
-  id: number;
   currentRound?: number;
   nextRound?: number;
   player1?: Player & { score?: number; color?: string; result?: MatchResult };
   player2?: Player & { score?: number; color?: string; result?: MatchResult };
 };
 
-type Matches = {
-  id: number;
-  aaaaa: Match[];
-};
+type Matches = Map<number, Match[]>;
