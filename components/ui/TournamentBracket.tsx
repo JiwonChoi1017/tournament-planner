@@ -13,23 +13,19 @@ const TournamentBracket = ({ matches }: Props) => {
         <div key={id}>
           {matchList.map(({ currentRound, player1, player2 }, idx) => (
             <div key={`${id}_${idx}`} style={{ marginBottom: "10px" }}>
-              {player1 ? (
+              {(player1 || id > 0) && (
                 <div>
                   <input
                     type="radio"
                     name={`result_${id}_${idx}`}
-                    value={player1.id}
-                    defaultChecked={player1.result === MATCH_RESULT.WIN}
+                    value={player1?.id}
+                    defaultChecked={player1?.result === MATCH_RESULT.WIN}
                   />
                   <label>
-                    <input type="text" defaultValue={`${player1.name}`} />
-                  </label>
-                </div>
-              ) : (
-                <div>
-                  <input type="radio" name={`result_${id}_${idx}`} />
-                  <label>
-                    <input type="text" />
+                    <input
+                      type="text"
+                      defaultValue={`${player1?.name ?? ""}`}
+                    />
                   </label>
                 </div>
               )}

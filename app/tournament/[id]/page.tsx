@@ -9,7 +9,7 @@ export default function TournamentDetail() {
   return (
     <>
       <span>{params.id}</span>
-      <TournamentBracket matches={[]} />
+      <TournamentBracket matches={undefined} />
     </>
   );
 }
