@@ -14,4 +14,5 @@ export const AUTH_PROVIDER = {
 export const MATCH_RESULT = {
   WIN: "win",
   LOSE: "lose",
+  BYE: "bye",
 } as const;
