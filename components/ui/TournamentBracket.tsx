@@ -6,7 +6,7 @@ type Props = {
   matches: Matches | undefined;
 };
 
-const TournamentBracket = React.memo(({ matches }: Props) => {
+export default function TournamentBracket({ matches }: Props) {
   return (
     <div>
       {matches ? (
@@ -57,6 +57,4 @@ const TournamentBracket = React.memo(({ matches }: Props) => {
       )}
     </div>
   );
-});
-
-export default TournamentBracket;
+}
