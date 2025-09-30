@@ -29,7 +29,10 @@ type Match = {
 
 type Matches = Map<number, Match[]>;
 
-type TournamentBracketElement = {
-  participants: string;
+/** 参加者入力オプション */
+export type ParticipantOptions = {
+  /** 参加者リスト */
+  participantList: string[];
+  /** 参加者割当て時にシャッフルするか */
   needToShuffleParticipants: boolean;
 };

@@ -1,11 +1,11 @@
 "use client";
 
+import { ParticipantOptions } from "@/types/common";
 import TournamentBracket from "@/components/ui/TournamentBracket";
-import { TournamentBracketElement } from "@/types/common";
 import TournamentForm from "@/components/ui/TournamentForm";
 
 export default function TournamentEdit() {
-  const createTournamentBracket = (bracket: TournamentBracketElement) => {
+  const createTournamentBracket = (bracket: ParticipantOptions) => {
     return;
   };
 

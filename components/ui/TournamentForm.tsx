@@ -1,10 +1,11 @@
 "use client";
 
-import { TournamentBracketElement } from "@/types/common";
+import { ParticipantOptions } from "@/types/common";
 import { useState } from "react";
 
+/** Props */
 type Props = {
-  createTournamentBracket: (bracket: TournamentBracketElement) => void;
+  createTournamentBracket: (participantOptions: ParticipantOptions) => void;
 };
 
 const TournamentForm = ({ createTournamentBracket }: Props) => {
@@ -24,9 +25,15 @@ const TournamentForm = ({ createTournamentBracket }: Props) => {
   };
 
   const onClickCreateTournamentBracketButton = () => {
+    const participantList = participants.trim().split("\n") || [];
+    // 人数制限
+    if (participantList.length < 2 || participantList.length > 64) {
+      // 弾くように
+      return;
+    }
     // どっかのタイミングでBracket側の参加者リストを初期化しないとダメ
     createTournamentBracket({
-      participants,
+      participantList,
       needToShuffleParticipants: allocation === "0",
     });
   };
